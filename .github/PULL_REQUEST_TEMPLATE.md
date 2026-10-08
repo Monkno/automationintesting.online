@@ -1,22 +1,22 @@
-## Problema y cambio
+## Problem and change
 
-¿Qué mejora este aporte y por qué? Indicá el caso TCxx y el issue relacionado si existen.
+What does this contribution improve, and why? Include the TCxx case and related issue if applicable. Write this PR in English; simple wording is welcome.
 
-## Validación
+## Validation
 
-Indicá comandos, entorno y resultados reales. Para documentación, describí los enlaces, rutas o instrucciones que revisaste. Anotá los chequeos que no pudiste ejecutar y el motivo.
+Provide commands, environment and actual results. For documentation, describe the links, paths or instructions you checked. Note any checks you could not run and explain why.
 
-## Aislamiento y evidencia
+## Isolation and evidence
 
-Si el cambio ejecuta pruebas contra la demo, explicá qué datos crea, cómo los identifica y cómo los limpia. Adjuntá sólo evidencia relevante sin tokens, cookies ni datos privados. Para documentación sin ejecución sobre la demo, indicá que no aplica.
+If the change runs tests against the demo, explain what data it creates, how it identifies that data and how it cleans it up. Include only relevant evidence without tokens, cookies or private data. For documentation without demo execution, mark this section as not applicable.
 
-## Uso de AI (si aplica)
+## AI use (if applicable)
 
-Resumí la tarea que pediste, qué sugerencia usaste y qué corregiste o verificaste personalmente. Podés indicar que no usaste AI.
+Summarize the task you requested, which suggestion you used and what you corrected or verified yourself. You can state that you did not use AI.
 
-## Antes de pedir revisión
+## Before requesting a review
 
-- [ ] El cambio tiene un alcance acotado y revisé el diff.
-- [ ] Documenté la validación realizada y cualquier limitación.
-- [ ] Actualicé los casos y la documentación afectados, o expliqué por qué no aplica.
-- [ ] Revisé que el commit no incluya `.env`, credenciales privadas ni artefactos generados.
+- [ ] The change has a focused scope, and I reviewed the diff.
+- [ ] I documented the validation performed and any limitations.
+- [ ] I updated affected cases and documentation, or explained why this does not apply.
+- [ ] I checked that the commit contains no `.env`, private credentials or generated artifacts.

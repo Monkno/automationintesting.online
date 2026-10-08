@@ -1,83 +1,83 @@
-# Colaborar en el repo
+# Contributing
 
-Gracias por traer tu mirada QA. Podés contribuir con documentación, exploración manual, casos, automatización o revisión de un pull request. No necesitás dominar AI ni Playwright para aportar algo útil.
+Thank you for bringing your QA perspective. You can contribute documentation, manual exploration, test cases, automation or pull request reviews. You do not need to master AI or Playwright to make a useful contribution.
 
-Escribí en español o inglés. Tratá las preguntas de quien empieza con paciencia y discutí las decisiones con ejemplos y evidencia. Al revisar, explicá el motivo de una sugerencia para que la otra persona pueda aprender de ella.
+Use English for documentation, issues, pull requests, prompts and shared learning notes. Practicing QA communication in English is part of this project. Simple wording is enough, and questions are welcome. Be patient with beginners and discuss decisions using examples and evidence. When reviewing, explain the reason for a suggestion so the author can learn from it.
 
-## Elegir un primer aporte
+## Choose a first contribution
 
-| Si querés practicar | Un aporte acotado | Qué entregar |
+| To practice | A small contribution | What to provide |
 | --- | --- | --- |
-| Instalación y Git | Seguir el README desde un clon limpio | Un paso corregido o un issue con el bloqueo y el entorno |
-| Diseño de casos | Revisar un límite de TC11 o TC17 | Datos, precondiciones y resultado esperado antes de automatizar |
-| TypeScript | Entender un parser de `src/support/money.ts` | Una explicación o un caso unitario que pruebe un riesgo nuevo |
-| Playwright | Revisar una aserción de navegación en TC02 | Qué resultado prueba y qué defecto detectaría |
-| Exploración manual | Probar teclado o menú móvil | Pasos reproducibles, esperado, observado y evidencia |
-| AI aplicada a QA | Pedir una propuesta sobre un caso existente | Contexto, propuesta del asistente y revisión humana |
+| Setup and Git | Follow the README from a clean clone | A corrected step or an issue with the blocker and environment |
+| Test design | Review a boundary in TC11 or TC17 | Data, preconditions and expected outcome before automation |
+| TypeScript | Understand a parser in `src/support/money.ts` | An explanation or a unit case that checks a new risk |
+| Playwright | Review a navigation assertion in TC02 | The outcome it checks and the defect it would catch |
+| Manual exploration | Test keyboard use or the mobile menu | Reproducible steps, expected and actual results, and evidence |
+| AI for QA | Ask for a proposal about an existing case | Context, the assistant's proposal and your review |
 
-Consultá los [issues abiertos](https://github.com/Monkno/automationintesting.online/issues) antes de empezar. Si alguien ya está trabajando en el tema, coordiná ahí. Para un cambio pequeño de documentación podés abrir el PR directamente. Para nuevas dependencias, nuevas capas o cambios amplios, abrí primero una propuesta que permita acordar el alcance.
+Check the [open issues](https://github.com/Monkno/automationintesting.online/issues) before starting. If someone is already working on the topic, coordinate there. For a small documentation change, you can open a PR directly. For new dependencies, new layers or larger changes, open a proposal first so contributors can agree on scope.
 
-## Preparar tu rama
+## Prepare your branch
 
-1. Hacé un fork en GitHub y cloná tu fork.
-2. Agregá este repo como `upstream` y creá una rama desde su `main`.
-3. Seguí la instalación del [README](README.md).
+1. Fork the repository on GitHub and clone your fork.
+2. Add this repository as `upstream` and create a branch from its `main`.
+3. Follow the setup instructions in the [README](README.md).
 
 ```bash
-git clone https://github.com/TU_USUARIO/automationintesting.online.git
+git clone https://github.com/YOUR_USERNAME/automationintesting.online.git
 cd automationintesting.online
 git remote add upstream https://github.com/Monkno/automationintesting.online.git
 git fetch upstream
-git switch -c docs/mi-primer-aporte upstream/main
+git switch -c docs/first-contribution upstream/main
 ```
 
-Reemplazá `TU_USUARIO` por tu usuario real y elegí un nombre que describa tu cambio, por ejemplo `test/limites-contacto` o `docs/instalacion-powershell`.
+Replace `YOUR_USERNAME` with your actual username. Choose a branch name that describes your change, such as `test/contact-boundaries` or `docs/powershell-setup`.
 
-## Preparar una contribución verificable
+## Make your contribution verifiable
 
-- Elegí un comportamiento o problema por PR y explicá por qué vale la pena cubrirlo.
-- Relacioná el cambio con el caso `TCxx` correspondiente. Si agregás un caso, asignale un identificador disponible y actualizá `TEST_CASES.md` y el mapa del README cuando corresponda.
-- Para E2E, importá `test` y `expect` de `src/fixtures/test.ts`, ajustando la ruta relativa. Los tests unitarios que no requieren esas fixtures pueden usar `@playwright/test`, como `tests/unit/money.spec.ts`.
-- Reutilizá pages, components, flows, factories y helpers existentes. Mantené las aserciones centradas en resultados, con datos del propio test y limpieza registrada en `janitor`.
-- Obtené los selectores del DOM observado. Priorizá roles, labels o test IDs cuando existan; documentá el motivo si la aplicación obliga a usar otro selector.
-- Investigá una falla antes de agregar sleeps, aumentar timeouts o debilitar una aserción. La suite y la demo tienen problemas distintos: indicá cuál reproduce tu evidencia.
-- Si usaste AI, describí brevemente la tarea que le diste y cómo verificaste su propuesta. [AI_WORKFLOW.md](docs/AI_WORKFLOW.md) incluye un flujo y prompts de ejemplo.
+- Focus on one behavior or problem per PR and explain why it deserves coverage.
+- Connect the change to its `TCxx` case. For a new case, choose an unused identifier and update `TEST_CASES.md` and the README coverage map when needed.
+- For E2E tests, import `test` and `expect` from `src/fixtures/test.ts`, adjusting the relative path. Unit tests that do not need these fixtures can use `@playwright/test`, as in `tests/unit/money.spec.ts`.
+- Reuse existing pages, components, flows, factories and helpers. Assert on outcomes using your own test data and register cleanup with `janitor`.
+- Get selectors from the observed DOM. Prefer roles, labels or test IDs when available; explain when the application requires a different selector.
+- Investigate a failure before adding sleeps, increasing timeouts or weakening an assertion. The suite and the demo have different problems: identify which one your evidence reproduces.
+- If you used AI, briefly describe its task and how you verified its proposal. [AI_WORKFLOW.md](docs/AI_WORKFLOW.md) includes a workflow and example prompts.
 
-`STRATEGY.md` y `TEST_CASES.md` registran comportamientos y defectos observados en una fecha concreta. Si la aplicación cambió, adjuntá evidencia actual y explicá la diferencia entre el comportamiento observado y el esperado. Cambiar una expectativa para obtener un test verde requiere esa justificación.
+`STRATEGY.md` and `TEST_CASES.md` record behavior and defects observed on a specific date. If the application has changed, include current evidence and explain the difference between observed and expected behavior. Changing an expectation to get a green test requires that justification.
 
-## Validar antes del PR
+## Validate before opening a PR
 
-Para cambios de documentación, revisá enlaces, rutas, nombres de comandos y ejemplos de ambas shells si los modificaste. No hace falta ejecutar toda la suite E2E por corregir texto.
+For documentation changes, check links, paths, command names and examples for both shells if you changed them. You do not need to run the entire E2E suite for a text correction.
 
-Para cambios en tests o TypeScript:
+For test or TypeScript changes:
 
 ```bash
 npm run typecheck
 npx playwright test --grep @unit
 ```
 
-Ejecutá también el archivo afectado. Por ejemplo, para una contribución sobre contacto:
+Also run the affected file. For example, for a contact contribution:
 
 ```bash
 npx playwright test tests/contact/contact.spec.ts --workers=1 --retries=0 --trace=on
 ```
 
-Si el cambio afecta fixtures, flows o helpers compartidos, ejecutá los grupos que los usan y una corrida completa cuando corresponda. Registrá comando, entorno, resultado y fallas pendientes. Si no pudiste ejecutar un chequeo, explicá el motivo; no lo marques como aprobado.
+If the change affects shared fixtures, flows or helpers, run the groups that use them and a full run when appropriate. Record the command, environment, result and unresolved failures. If you could not run a check, explain why; do not mark it as passed.
 
-Los reportes y trazas ayudan a revisar una falla. Compartí sólo evidencia relevante y revisá su contenido antes de publicarla: puede incluir cookies, tokens o datos personales. `.env`, credenciales privadas y artefactos generados no forman parte del commit.
+Reports and traces help reviewers investigate failures. Share only relevant evidence and inspect it before publishing: it may contain cookies, tokens or personal data. Keep `.env`, private credentials and generated artifacts out of your commit.
 
-## Abrir y revisar el pull request
+## Open and review the pull request
 
 ```bash
 git status --short
 git diff --check
 git add README.md
-git commit -m "docs: aclarar los primeros pasos para QA"
-git push -u origin docs/mi-primer-aporte
+git commit -m "docs: clarify the first steps for QA contributors"
+git push -u origin docs/first-contribution
 ```
 
-El ejemplo agrega sólo `README.md`; reemplazalo por los archivos de tu aporte. Abrí un PR hacia `main` de `Monkno/automationintesting.online` y completá la plantilla. Usá un draft si todavía estás investigando o querés una revisión temprana.
+The example stages only `README.md`; replace it with your contribution's files. Open a PR against `main` in `Monkno/automationintesting.online` and complete the template. Use a draft if you are still investigating or want an early review.
 
-Incluí el problema, el cambio propuesto y la validación realizada. Si hay un issue relacionado, enlazalo; usá `Closes #NUMERO` sólo si el PR lo resuelve por completo, reemplazando `NUMERO` por el número real. Para cambios visuales o defectos de la demo, agregá evidencia del comportamiento.
+Include the problem, proposed change and validation performed. Link a related issue if one exists; use `Closes #NUMBER` only if the PR fully resolves it, replacing `NUMBER` with the actual issue number. For visual changes or demo defects, include evidence of the behavior.
 
-Quien revisa debería poder entender qué riesgo cubre el aporte, cómo ejecutarlo y qué datos crea o elimina. Respondé a las observaciones en el mismo PR y mantené la descripción alineada con el cambio final.
+A reviewer should be able to understand the risk your contribution covers, how to run it and what data it creates or deletes. Respond to feedback in the same PR and keep its description aligned with the final change.

@@ -1,34 +1,35 @@
-# Instrucciones para asistentes de AI
+# Instructions for AI assistants
 
-Este repositorio es un espacio de práctica colaborativa de QA con Playwright y TypeScript. Seguí el alcance solicitado por la persona que contribuye y mantené cada cambio pequeño y revisable.
+This repository is a collaborative QA practice space using Playwright and TypeScript. Follow the contributor's requested scope and keep each change small and reviewable.
 
-## Contexto antes de editar
+## Context before editing
 
-- Leé `README.md`, `CONTRIBUTING.md` y `docs/AI_WORKFLOW.md`.
-- Para cambios de cobertura, consultá `TEST_CASES.md` y las decisiones de `STRATEGY.md`.
-- Inspeccioná el spec y los helpers relevantes antes de proponer código. Identificá supuestos pendientes y distinguí evidencia histórica de observaciones actuales.
-- Si la tarea es sólo de documentación, modificá únicamente documentación. No cambies código, configuración, dependencias ni lockfiles sin un pedido que lo incluya.
+- Read `README.md`, `CONTRIBUTING.md` and `docs/AI_WORKFLOW.md`.
+- Use English for repository documentation, shared prompts, issues, pull requests and learning notes. Help contributors practice clear English; perfect grammar is not required.
+- For coverage changes, consult `TEST_CASES.md` and the decisions in `STRATEGY.md`.
+- Inspect the relevant spec and helpers before proposing code. Identify unresolved assumptions and distinguish historical evidence from current observations.
+- For documentation tasks, edit only documentation. Do not change code, configuration, dependencies or lockfiles unless the request includes them.
 
-## Convenciones de la suite
+## Suite conventions
 
-- Los E2E usan `test` y `expect` de `src/fixtures/test.ts`. Los unitarios aislados pueden importar de `@playwright/test`.
-- Reutilizá `src/pages`, `src/components`, `src/flows`, `src/data` y `src/support`; agregá una abstracción sólo si el cambio la necesita.
-- Obtené selectores de evidencia del DOM. No inventes elementos, endpoints ni firmas de métodos.
-- Afirmá resultados verificables con datos propios, no sólo presencia de elementos o variaciones de contadores globales.
-- Conservá las aserciones relevantes. Investigá fallas antes de proponer sleeps, timeouts mayores, retries adicionales o expectativas menos estrictas.
+- E2E tests use `test` and `expect` from `src/fixtures/test.ts`. Isolated unit tests can import from `@playwright/test`.
+- Reuse `src/pages`, `src/components`, `src/flows`, `src/data` and `src/support`; add an abstraction only when the change needs it.
+- Derive selectors from DOM evidence. Do not invent elements, endpoints or method signatures.
+- Assert verifiable outcomes using the test's own data, rather than only element presence or changes in global counters.
+- Preserve relevant assertions. Investigate failures before proposing sleeps, longer timeouts, additional retries or weaker expectations.
 
-## Aislamiento y datos
+## Isolation and data
 
-- No modifiques ni elimines datos de otras personas ni las habitaciones semilla 101, 102 y 103.
-- Usá las factories existentes y registrá las entidades creadas en `janitor`.
-- Para reservar, reutilizá `workerRoom` y `bookableStay`. Registrá la reserva con su huésped cuando sea necesario limpiar también la notificación de admin.
-- No publiques `.env`, tokens, cookies ni credenciales privadas. Revisá y redactá evidencia sensible antes de compartir artefactos.
-- Proponé las exploraciones que afecten estado global o generen carga en un issue y usá un despliegue propio para ejecutarlas.
+- Do not modify or delete other people's data or seed rooms 101, 102 and 103.
+- Use existing factories and register created entities with `janitor`.
+- For bookings, reuse `workerRoom` and `bookableStay`. Register the booking with its guest when cleanup must also remove the admin notification.
+- Do not publish `.env`, tokens, cookies or private credentials. Inspect evidence and redact sensitive content before sharing artifacts.
+- Propose explorations that affect global state or generate load in an issue, and use your own deployment to run them.
 
-## Validación y entrega
+## Validation and delivery
 
-- Documentación: verificá enlaces, rutas, scripts y ejemplos contra los archivos reales. No ejecutes toda la suite E2E por un cambio de texto.
-- TypeScript y tests: ejecutá `npm run typecheck`, `npx playwright test --grep @unit` y los specs afectados, inicialmente con `--workers=1 --retries=0`.
-- Cambios compartidos: ampliá la validación a los grupos afectados según `CONTRIBUTING.md`.
-- Actualizá casos y mapa de cobertura cuando cambie la suite; preservá la fecha de las mediciones históricas.
-- Informá archivos modificados, motivo, comandos ejecutados y resultados reales. Si no ejecutaste algo, decilo; no inventes resultados ni evidencia.
+- Documentation: verify links, paths, scripts and examples against real files. Do not run the full E2E suite for a text change.
+- TypeScript and tests: run `npm run typecheck`, `npx playwright test --grep @unit` and affected specs, initially with `--workers=1 --retries=0`.
+- Shared changes: expand validation to affected groups as described in `CONTRIBUTING.md`.
+- Update cases and the coverage map when the suite changes; preserve the dates of historical measurements.
+- Report changed files, reasons, executed commands and actual results. Say when you did not run a check; never invent results or evidence.

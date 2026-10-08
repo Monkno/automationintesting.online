@@ -1,217 +1,150 @@
-# Test Cases — automationintesting.online (Restful Booker Platform v2.2)
+# Test Cases: automationintesting.online (Restful Booker Platform v2.2)
 
-A diferencia de `automationexercise.com`, este sitio **no publica una lista oficial
-de casos de prueba**. Los casos de abajo se derivaron explorando la aplicación en
-vivo el **2026-09-03**: navegando el sitio público, inspeccionando el DOM, disparando
-las validaciones reales del backend y consultando la API pública (`/api/room`,
-`/api/branding`, `/api/message/count`).
+Unlike `automationexercise.com`, this site does not publish an official test case list. The cases below were derived by exploring the live application on September 3, 2026: navigating the public site, inspecting the DOM, triggering actual backend validations and querying the public API (`/api/room`, `/api/branding`, `/api/message/count`).
 
-Cada caso lleva un ID `TC##` al que se mapea el test automatizado correspondiente.
+Each case has a `TC##` identifier that maps to its automated test.
 
-**Leyenda de verificación**
+## Verification legend
 
-- ✅ **Observado** — el comportamiento fue confirmado manualmente durante la exploración.
-- 🔍 **A confirmar** — comportamiento esperado detrás del login de admin, a validar al
-  automatizarlo; si la app difiere, manda la app y se ajusta el caso (y se anota en `STRATEGY.md`).
-- 🔧 **Ajustado tras automatizar** — el caso estaba escrito de una manera y la aplicación
-  se comporta de otra. Manda la aplicación: el texto de abajo es lo que la app hace hoy,
-  y el desvío queda registrado como defecto en `STRATEGY.md` con su identificador `D##`.
+- ✅ Observed: the behavior was manually confirmed during exploration.
+- 🔍 To confirm: expected behavior behind the admin login, to be checked during automation. If the application differs, adjust the case to document the observed behavior and record the difference in `STRATEGY.md`.
+- 🔧 Adjusted after automation: the application behaved differently from the original case. The text below records the behavior observed at that time; the discrepancy is documented in `STRATEGY.md` under its `D##` identifier.
 
-**Estado tras la automatización (2026-09-03):** los 28 casos están automatizados y en verde.
-Once fueron ajustados porque la aplicación se comporta distinto a lo escrito:
-TC02, TC03, TC14, TC16, TC17, TC18, TC21, TC23, TC25, TC26 y TC28.
-Dos pares se automatizaron como un único test porque uno es subconjunto estricto del otro
-(TC09+TC14 y TC15+TC18); ver `STRATEGY.md`, sección de redundancia.
+Status after automation on September 3, 2026: all 28 cases were automated and passing. Eleven were adjusted because the application behaved differently from the original description: TC02, TC03, TC14, TC16, TC17, TC18, TC21, TC23, TC25, TC26 and TC28. Two pairs share a test because one case is a strict subset of the other (TC09+TC14 and TC15+TC18); see the redundancy section in `STRATEGY.md`.
 
----
+These statuses and findings are historical evidence, not results from a current execution. The adjustments describe observed behavior; they do not establish that a documented defect is the correct business behavior.
 
-## A. Sitio público — catálogo y navegación
+## A. Public site: catalogue and navigation
 
-### TC01 — La home lista las habitaciones con su tipo y precio ✅
+### TC01: The home page lists rooms with their type and price ✅
 
-1. Abrir `https://automationintesting.online/`.
-2. Ir a la sección *Our Rooms*.
+1. Open `https://automationintesting.online/`.
+2. Go to the *Our Rooms* section.
 
-**Esperado:** se listan las habitaciones publicadas. Al momento de la exploración:
-Single £100/noche, Double £150/noche, Suite £225/noche. Cada tarjeta muestra tipo,
-descripción, lista de amenities (TV / WiFi / Radio / Safe) y un botón *Book now*.
-El set de habitaciones y sus precios deben coincidir con `GET /api/room` (la fuente
-de verdad), no con constantes hardcodeadas en el test.
+Expected: published rooms are listed. At exploration time: Single £100/night, Double £150/night, Suite £225/night. Each card shows the type, description, amenities (TV / WiFi / Radio / Safe) and a *Book now* button. Rooms and prices must match `GET /api/room`, the source of truth, rather than hard-coded test constants.
 
-### TC02 — La navegación del header ancla a cada sección 🔧
+### TC02: Header navigation anchors to each section 🔧
 
-1. Desde la home, usar los links *Rooms*, *Booking*, *Location*, *Contact*.
+1. From the home page, use the *Rooms*, *Booking*, *Location* and *Contact* links.
 
-**Esperado:** cada link lleva a su sección (`#rooms`, `#booking`, `#location`,
-`#contact`) y la sección queda visible en viewport (`toBeInViewport`, no
-`toBeVisible`: las cinco secciones están en el DOM desde el principio, así que
-"visible" no probaría que el scroll ocurrió).
+Expected: each link reaches its section (`#rooms`, `#booking`, `#location`, `#contact`), which appears in the viewport. Use `toBeInViewport`, not `toBeVisible`: all five sections are in the DOM from the start, so visibility alone would not prove that scrolling happened.
 
-**Ajuste (D2):** el link *Amenities* existe en el header y apunta a `/#amenities`,
-pero **no existe ninguna sección con ese id** en la página. El caso ya no espera que
-*Amenities* haga scroll a nada; en su lugar afirma explícitamente el estado actual
-(el link existe, el destino no), para que arreglar el bug rompa el test y el caso
-se revise.
+Adjustment (D2): the *Amenities* link exists in the header and points to `/#amenities`, but no section with that ID exists. The case no longer expects *Amenities* to scroll to a section. Instead, it explicitly asserts the current state (the link exists, the destination does not), so fixing the bug breaks the test and triggers a case review.
 
-### TC03 — El detalle de habitación muestra descripción, features y políticas 🔧
+### TC03: Room details show the description, features and policies 🔧
 
-1. Desde la home, click en *Book now* de una habitación.
-2. Se abre `/reservation/{roomid}?checkin=…&checkout=…`.
+1. Click a room's *Book now* link on the home page.
+2. The page opens `/reservation/{roomid}?checkin=…&checkout=…`.
 
-**Esperado:** la página muestra el tipo de habitación, badge *Accessible* si aplica,
-capacidad máxima de huéspedes, descripción, *Room Features*, políticas de check-in
-y check-out, reglas de la casa, y el precio por noche consistente con el de la home.
-La descripción y las features se comparan contra `GET /api/room`, no contra literales.
+Expected: the page shows the room type, an *Accessible* badge when applicable, maximum guest capacity, description, *Room Features*, check-in and check-out policies, house rules and a nightly price consistent with the home page. Compare the description and features with `GET /api/room`, not literal values.
 
-**Ajuste (D8):** el caso decía "check-in 15:00–20:00 / check-out 11:00". La aplicación
-renderiza el formato de 12 horas: `Check-in: 3:00 PM - 8:00 PM` y
-`Check-out: By 11:00 AM`. Se asertan esos textos.
+Adjustment (D8): the original case used check-in 15:00 to 20:00 and check-out 11:00. The application renders the 12-hour format: `Check-in: 3:00 PM - 8:00 PM` and `Check-out: By 11:00 AM`. Assert those strings.
 
-### TC04 — "Similar Rooms" excluye la habitación actual y ofrece las demás ✅
+### TC04: Similar Rooms excludes the current room and offers the others ✅
 
-1. Abrir el detalle de una habitación.
-2. Ir al bloque *Similar Rooms You Might Like*.
+1. Open a room's detail page.
+2. Go to *Similar Rooms You Might Like*.
 
-**Esperado:** se ofrecen las otras habitaciones del catálogo, nunca la que se está
-viendo, cada una con su precio correcto. *View Details* navega a su detalle.
+Expected: other catalogue rooms are offered, never the current room, each with its correct price. *View Details* navigates to the selected room's detail page.
 
-### TC05 — El footer expone los datos de contacto del negocio ✅
+### TC05: The footer displays the business contact details ✅
 
-1. Abrir la home y bajar al footer.
+1. Open the home page and scroll to the footer.
 
-**Esperado:** dirección, teléfono y email coinciden con lo que devuelve
-`GET /api/branding` (dirección "Shady Meadows B&B, Shadows valley,
-Newingtonfordburyshire, Dilbery, N1 1AA", teléfono `012345678901`,
-email `fake@fakeemail.com`).
+Expected: the address, phone and email match `GET /api/branding` (address "Shady Meadows B&B, Shadows valley, Newingtonfordburyshire, Dilbery, N1 1AA", phone `012345678901`, email `fake@fakeemail.com`).
 
----
+## B. Availability and booking
 
-## B. Disponibilidad y reserva
+### TC06: Check Availability carries the selected dates into the booking ✅
 
-### TC06 — Check Availability propaga las fechas elegidas a la reserva ✅
+1. On the home page, choose future check-in and check-out dates in *Check Availability & Book Your Stay*.
+2. Click *Check Availability*.
+3. Click *Book now* on a room in the results.
 
-1. En la home, sección *Check Availability & Book Your Stay*, elegir un check-in y
-   un check-out futuros.
-2. Click en *Check Availability*.
-3. Click en *Book now* de una habitación del resultado.
+Expected: the selected dates appear in the detail URL (`?checkin=YYYY-MM-DD&checkout=YYYY-MM-DD`) and in the price summary.
 
-**Esperado:** las fechas elegidas viajan en la URL del detalle
-(`?checkin=YYYY-MM-DD&checkout=YYYY-MM-DD`) y se reflejan en el resumen de precio.
+### TC07: The price summary calculates nights, fees and total ✅
 
-### TC07 — El resumen de precio calcula noches, fees y total ✅
+1. Open `/reservation/1?checkin=2026-10-05&checkout=2026-10-08` (3 nights at £100/night in the historical example).
 
-1. Abrir `/reservation/1?checkin=2026-10-05&checkout=2026-10-08` (3 noches, £100/noche).
+Expected: *Price Summary* shows `£100 x 3 nights = £300`, `Cleaning fee £25`, `Service fee £15` and Total £340. Verify the arithmetic `(price × nights) + 25 + 15` using the room's actual price, rather than asserting the literal `£340`.
 
-**Esperado:** *Price Summary* muestra `£100 x 3 nights = £300`, `Cleaning fee £25`,
-`Service fee £15` y **Total £340**. El total debe verificarse como aritmética
-`(precio × noches) + 25 + 15`, calculada a partir del precio real de la habitación,
-no como el literal `£340`.
+### TC08: The total is recalculated when the number of nights changes ✅
 
-### TC08 — El total se recalcula al cambiar la cantidad de noches ✅
+1. Open a room's detail page with an N-night range.
+2. Repeat with an M-night range (M ≠ N) for the same room.
 
-1. Abrir el detalle de una habitación con un rango de N noches.
-2. Repetir con un rango de M noches (M ≠ N), sobre la misma habitación.
+Expected: the nightly subtotal changes proportionally. The fixed fees (£25 cleaning and £15 service) do not change, and the total reflects the new calculation.
 
-**Esperado:** el subtotal por noches cambia proporcionalmente; los fees fijos
-(£25 de limpieza y £15 de servicio) no cambian; el total refleja el nuevo cálculo.
+### TC09: A booking succeeds with valid data ✅
 
-### TC09 — Reserva exitosa con datos válidos ✅
+1. Open a room's detail page with future dates.
+2. Click *Reserve Now*.
+3. Complete Firstname, Lastname, Email and Phone with valid data (phone length of 11 to 21 characters).
+4. Click *Reserve Now* to confirm.
 
-1. Abrir el detalle de una habitación con fechas futuras.
-2. Click en *Reserve Now*.
-3. Completar Firstname, Lastname, Email y Phone con datos válidos
-   (teléfono de 11–21 caracteres).
-4. Click en *Reserve Now* (confirmar).
+Expected: the *Booking Confirmed* panel appears with "Your booking has been confirmed for the following dates:" and the exact booked range `YYYY-MM-DD - YYYY-MM-DD`. *Return home* is available.
 
-**Esperado:** aparece el panel **Booking Confirmed** con el mensaje
-"Your booking has been confirmed for the following dates:" y el rango exacto
-`YYYY-MM-DD - YYYY-MM-DD` que se reservó. Se ofrece *Return home*.
+Automation note: TC09 and TC14 run as one test (`TC09 + TC14`). TC14 is TC09 plus an API read of the same booking. Creating two bookings to separate them would write twice the data to the shared site without proving anything extra.
 
-**Nota de automatización:** TC09 y TC14 se ejecutan como un único test
-(`TC09 + TC14`). TC14 es TC09 más una lectura de la API sobre la misma reserva;
-duplicar la reserva para separarlos escribiría el doble de datos en un sitio
-compartido sin probar nada adicional.
+### TC10: An empty booking form shows all validation errors ✅
 
-### TC10 — Reserva con formulario vacío muestra todos los errores de validación ✅
+1. Open a room's detail page and click *Reserve Now*.
+2. Without completing any fields, click *Reserve Now* to confirm.
 
-1. Abrir el detalle de una habitación y click en *Reserve Now*.
-2. Sin completar nada, click en *Reserve Now* (confirmar).
+Expected: the error block includes at least `Firstname should not be blank`, `Lastname should not be blank`, `size must be between 11 and 21` (phone), `size must be between 3 and 30`, `size must be between 3 and 18` and `must not be empty`. No booking is created.
 
-**Esperado:** se muestra el bloque de errores con, al menos:
-`Firstname should not be blank`, `Lastname should not be blank`,
-`size must be between 11 and 21` (teléfono), `size must be between 3 and 30`,
-`size must be between 3 and 18` y `must not be empty`. No se crea la reserva.
+### TC11: Phone length validation ✅
 
-### TC11 — Validación de longitud del teléfono ✅
+1. Start a booking with a valid first name, last name and email.
+2. Enter a 10-character phone number (below the minimum) and confirm.
+3. Repeat with 22 characters (above the maximum).
 
-1. Iniciar una reserva con nombre, apellido y email válidos.
-2. Cargar un teléfono de 10 caracteres (por debajo del mínimo) y confirmar.
-3. Repetir con 22 caracteres (por encima del máximo).
+Expected: both attempts show `size must be between 11 and 21` and create no booking. Phone numbers with 11 and 21 characters are accepted, checking both boundaries.
 
-**Esperado:** en ambos casos aparece `size must be between 11 and 21` y la reserva
-no se crea. Con 11 y con 21 caracteres, en cambio, la reserva sí se confirma
-(prueba de borde).
+### TC12: Email format validation 🔍
 
-### TC12 — Validación de formato de email 🔍
+1. Start a booking with all other fields valid.
+2. Enter an email without `@` or without a domain and confirm.
 
-1. Iniciar una reserva con el resto de los datos válidos.
-2. Cargar un email sin `@` o sin dominio y confirmar.
+Expected: the booking is rejected with an email validation message (`must be a well-formed email address`), and no booking is created.
 
-**Esperado:** se rechaza la reserva con un mensaje de validación de email
-(`must be a well-formed email address`) y no se crea la reserva.
+### TC13: Cancel discards the booking form ✅
 
-### TC13 — *Cancel* descarta el formulario de reserva ✅
+1. Open a room's detail page and click *Reserve Now*.
+2. Partially complete the form.
+3. Click *Cancel*.
 
-1. Abrir el detalle de una habitación y click en *Reserve Now*.
-2. Completar parcialmente el formulario.
-3. Click en *Cancel*.
+Expected: the form closes, the previous state returns with *Reserve Now* available, and no booking is created.
 
-**Esperado:** el formulario se cierra, se vuelve al estado previo (*Reserve Now*
-disponible) y no se crea ninguna reserva.
+### TC14: A booking created through the UI is visible through the API 🔧
 
-### TC14 — La reserva creada por UI es visible por API 🔧
+1. Create a booking through the UI (TC09) with a unique, traceable name.
+2. Query the booking through the authenticated admin API (`GET /api/booking?roomid=…`).
 
-1. Crear una reserva por UI (TC09) con un nombre único y trazable.
-2. Consultar la reserva vía API de admin (`GET /api/booking?roomid=…`, autenticado).
+Expected: a booking exists with that exact `roomid`, first name, last name and date range. This closes the UI-to-backend check for TC09, which on its own only checks a confirmation banner.
 
-**Esperado:** existe una reserva con ese `roomid`, nombre, apellido y fechas exactas.
-Este caso cierra el ciclo UI → backend y es el que da valor real a la aserción de
-TC09, que por sí sola solo verifica un cartel.
+Adjustment: neither `GET /api/booking?roomid=N` nor `GET /api/booking/{id}` returns email or phone. The payload is `{bookingid, roomid, firstname, lastname, depositpaid, bookingdates}`. The case no longer expects to verify those two fields through the API. The last name includes a tag unique per worker and millisecond, identifying the booking unambiguously.
 
-**Ajuste:** ni `GET /api/booking?roomid=N` ni `GET /api/booking/{id}` devuelven
-email ni teléfono — el payload es `{bookingid, roomid, firstname, lastname,
-depositpaid, bookingdates}`. El caso ya no espera verificar esos dos campos por API.
-El apellido lleva un tag único por worker y milisegundo, así que identifica la reserva
-sin ambigüedad.
+Adjustment (D12): creating a booking also causes the backend to write an admin inbox message ("You have a new booking!") under the guest's name. The UI does not document this side effect. Suite teardown deletes it alongside the booking.
 
-**Ajuste (D12):** crear una reserva provoca, además, que el backend escriba un mensaje
-en la bandeja de admin ("You have a new booking!") a nombre del huésped. No aparece
-documentado en ninguna parte de la UI. El teardown de la suite lo borra junto con la
-reserva.
+## C. Contact form
 
----
+### TC15: A valid contact message is sent successfully ✅
 
-## C. Formulario de contacto
+1. On the home page, go to *Send Us a Message*.
+2. Complete Name, Email, Phone, Subject and Message with valid data.
+3. Click *Submit*.
 
-### TC15 — Envío exitoso de un mensaje de contacto ✅
+Expected: the confirmation displays the sender's name and subject. The fields use `data-testid`: `ContactName`, `ContactEmail`, `ContactPhone`, `ContactSubject`, `ContactDescription`.
 
-1. En la home, ir a *Send Us a Message*.
-2. Completar Name, Email, Phone, Subject y Message con datos válidos.
-3. Click en *Submit*.
+### TC16: An empty contact form shows validation errors 🔧
 
-**Esperado:** se muestra la confirmación de envío con el nombre del remitente y el
-asunto. Los campos usan `data-testid`: `ContactName`, `ContactEmail`,
-`ContactPhone`, `ContactSubject`, `ContactDescription`.
+1. Submit the contact form without completing any fields.
 
-### TC16 — Contacto vacío muestra los errores de validación 🔧
+Expected: `POST /api/message` returns 400 and displays exactly these eight errors. The backend's order is not stable, so compare them as a set:
 
-1. Enviar el formulario de contacto sin completar ningún campo.
-
-**Esperado:** `POST /api/message` responde 400 y se listan **exactamente** estos ocho
-errores (el orden que devuelve el backend no es estable, así que se compara como
-conjunto):
-
-```
+```text
 Name may not be blank
 Email may not be blank
 Phone may not be blank
@@ -222,217 +155,143 @@ Message may not be blank
 Message must be between 20 and 2000 characters.
 ```
 
-**Ajuste:** el caso hablaba de "el contador de mensajes no incrementa". El contador
-`/api/message/count` es global y compartido con cualquier otro visitante del demo,
-así que no puede sostener una aserción exacta. Lo que sí prueba que no se envió nada
-es el 400 de `POST /api/message`, que es lo que se asierta.
+Adjustment: the original case expected the message count not to increase. `/api/message/count` is global and shared with every demo visitor, so it cannot support that exact assertion. The 400 from `POST /api/message` proves that the submission was rejected, and is what the test asserts.
 
-### TC17 — Validaciones de longitud del formulario de contacto 🔧
+### TC17: Contact form length validation 🔧
 
-1. Enviar el formulario con un asunto por debajo del mínimo (< 5 caracteres).
-2. Enviar con un mensaje por debajo del mínimo (< 20 caracteres).
+1. Submit the form with a subject below the minimum length (< 5 characters).
+2. Submit the form with a message below the minimum length (< 20 characters).
 
-**Esperado:** cada caso muestra **su único** mensaje de tamaño y `POST /api/message`
-responde 400.
+Expected: each case shows only its own length error, and `POST /api/message` returns 400.
 
-**Ajuste:** los textos reales no son los mensajes crudos de Bean Validation que suponía
-el caso, sino mensajes propios del backend:
+Adjustment: the actual strings are custom backend messages, not the raw Bean Validation messages assumed in the original case:
 
-| Campo   | Esperado en el caso original         | Texto real de la aplicación                        |
-| ------- | ------------------------------------ | -------------------------------------------------- |
-| Subject | `size must be between 5 and 100`     | `Subject must be between 5 and 100 characters.`    |
-| Message | `size must be between 20 and 2000`   | `Message must be between 20 and 2000 characters.`  |
+| Field | Original expected message | Actual application message |
+| --- | --- | --- |
+| Subject | `size must be between 5 and 100` | `Subject must be between 5 and 100 characters.` |
+| Message | `size must be between 20 and 2000` | `Message must be between 20 and 2000 characters.` |
 
-El formulario de reserva, en cambio, sí devuelve los mensajes crudos
-(`size must be between 3 and 18` y compañía): los dos formularios no comparten capa
-de validación.
+The booking form does return raw messages such as `size must be between 3 and 18`. The two forms do not share a validation layer.
 
-### TC18 — El mensaje enviado incrementa el contador de mensajes 🔧
+### TC18: Sending a message increases the message count 🔧
 
-1. Leer el valor de `GET /api/message/count`.
-2. Enviar un mensaje válido por UI (TC15).
-3. Volver a leer el contador.
+1. Read `GET /api/message/count`.
+2. Send a valid UI message (TC15).
+3. Read the count again.
 
-**Esperado:** el mensaje figura como no leído en `GET /api/message`, y
-`GET /api/message/count` coincide con la cantidad de mensajes no leídos que lista
-`GET /api/message`. Cierra el ciclo UI → backend del TC15.
+Expected: the message appears as unread in `GET /api/message`, and `GET /api/message/count` matches the number of unread messages listed by `GET /api/message`. This closes the UI-to-backend check for TC15.
 
-**Ajuste:** "el contador aumenta en 1" no se puede sostener en este sitio. El contador
-es global, y además la propia suite lo mueve en paralelo: cada reserva creada por otro
-worker escribe un mensaje (D12) y su teardown lo borra. Se midió: la aserción de delta
-falló en 2 de 4 corridas completas. Lo que sí es exacto y no depende de la concurrencia
-es (a) que *este* mensaje está entre los no leídos y (b) que el endpoint de conteo
-concuerda con el listado.
+Adjustment: a count increase of exactly one cannot be asserted on this site. The counter is global, and the suite also changes it in parallel: each booking made by another worker writes a message (D12), which its teardown deletes. The delta assertion failed in 2 of 4 full runs. The assertions that can be scoped correctly are that this message appears among the unread messages and that the count endpoint agrees with the list.
 
-**Nota de automatización:** TC15 y TC18 se ejecutan como un único test
-(`TC15 + TC18`). TC18 es TC15 más una lectura de la API sobre el mismo mensaje.
+Automation note: TC15 and TC18 run as one test (`TC15 + TC18`). TC18 is TC15 plus an API read of the same message.
 
----
+## D. Admin panel: authentication
 
-## D. Panel de administración — autenticación
+The restful-booker-platform project's public demo credentials are provided through `.env` and are never hard-coded in test code.
 
-> Credenciales de demo públicas del proyecto restful-booker-platform.
-> Se externalizan en `.env` y nunca se hardcodean en el código de los tests.
+### TC19: Admin login with valid credentials ✅ (form) / 🔍 (destination)
 
-### TC19 — Login de admin con credenciales válidas ✅ (formulario) / 🔍 (destino)
+1. Open `/admin`.
+2. Complete `#username` and `#password`, then click `#doLogin`.
 
-1. Abrir `/admin`.
-2. Completar `#username` y `#password` y click en `#doLogin`.
+Expected: the admin panel opens, and its header shows admin navigation and the *Logout* option.
 
-**Esperado:** se accede al panel de administración; el header muestra la navegación
-de admin y la opción *Logout*.
+### TC20: Admin login with invalid credentials 🔍
 
-### TC20 — Login de admin con credenciales inválidas 🔍
+1. Open `/admin` and try to sign in with an incorrect password.
 
-1. Abrir `/admin` e intentar entrar con una contraseña incorrecta.
+Expected: an authentication error appears, the panel remains inaccessible, and the URL stays on the login page.
 
-**Esperado:** se muestra un error de autenticación, no se accede al panel y la URL
-sigue siendo la de login.
+### TC21: Logout ends the admin session 🔧
 
-### TC21 — Logout cierra la sesión de admin 🔧
+1. While signed in, click *Logout*.
 
-1. Estando logueado, click en *Logout*.
+Expected: the session ends, the browser's `token` cookie is deleted, and navigating directly to `/admin/rooms` requires login again.
 
-**Esperado:** la sesión termina — la cookie `token` se borra del navegador — y al
-navegar directamente a `/admin/rooms` se vuelve a exigir login.
+Adjustment (D4): the original case expected a return to the login form. The application redirects to the public home page (`/`), not `/admin`. Assert that destination.
 
-**Ajuste (D4):** el caso decía "vuelve al formulario de login". La aplicación redirige
-a la **home pública** (`/`), no a `/admin`. Se asierta ese destino.
+Observation (D5): the admin header renders *Logout* on the login page even without a session. Check the panel's section links (Rooms / Report / Branding / Messages) and the cookie to establish a session, rather than the visibility of *Logout*.
 
-**Observación (D5):** el header de admin renderiza un botón *Logout* también en la
-pantalla de login, sin sesión. Por eso "hay sesión" se verifica con los links de sección
-del panel (Rooms / Report / Branding / Messages) y con la cookie, nunca con la
-visibilidad de *Logout*.
+### TC22: Admin routes are protected without a session 🔍
 
-### TC22 — Las rutas de admin están protegidas sin sesión 🔍
+1. Without a session, navigate directly to an internal panel route (rooms / report / messages).
 
-1. Sin sesión, navegar directamente a una ruta interna del panel (rooms / report / messages).
+Expected: the application redirects to login instead of exposing the content.
 
-**Esperado:** la app redirige al login en lugar de exponer el contenido.
+## E. Admin panel: rooms
 
----
+### TC23: Create a room 🔧
 
-## E. Panel de administración — habitaciones
+1. Sign in as admin and open room management.
+2. Create a room with a number, type, accessibility value, price and features.
 
-### TC23 — Crear una habitación 🔧
+Expected: the room appears in the admin list with exactly the submitted data, in `GET /api/room` with the same values, and on its own reachable public page `/reservation/{roomid}` with the correct title, nightly price and *Price Summary* arithmetic.
 
-1. Logueado como admin, ir a la gestión de habitaciones.
-2. Crear una habitación con número, tipo, accesibilidad, precio y features.
+Adjustment (D11): the original case also expected the room on the public home page. The *Our Rooms* grid never displays more than three rooms, regardless of the catalogue size. Exploration confirmed that the browser received six rooms from `GET /api/room` while the grid still rendered three. *Similar Rooms* has the same limit. The created room is not advertised on the home page; the case asserts that observed behavior and verifies publication through its direct URL.
 
-**Esperado:** la habitación aparece en el listado de admin con exactamente los datos
-cargados, en `GET /api/room` con esos mismos valores, y es alcanzable y correctamente
-tarifada en su propia página pública `/reservation/{roomid}` (título, precio por noche
-y aritmética del *Price Summary*).
+### TC24: Edit a room 🔍
 
-**Ajuste (D11):** el caso decía "y también en el sitio público". La grilla *Our Rooms*
-de la home **nunca muestra más de tres habitaciones**, sin importar cuántas tenga el
-catálogo. Se verificó con seis habitaciones en `GET /api/room` y con el navegador
-recibiendo las seis: la grilla siguió renderizando tres. *Similar Rooms* tiene el mismo
-tope. La habitación creada no se anuncia en la home; el caso asierta ese hecho tal como
-es hoy, y verifica la publicación por la vía que sí funciona (su URL directa).
+1. Open a room created by the test, never a seed room.
+2. Change its price and features, then save.
 
-### TC24 — Editar una habitación 🔍
+Expected: `PUT /api/room/{id}` returns 202. The list and detail show the new values, while the type and accessibility remain unchanged (read them before editing and compare afterward). The public *Price Summary* uses the new price.
 
-1. Abrir una habitación creada por el test (nunca una de las semilla).
-2. Modificar precio y features, y guardar.
+Observation (D13): the edit form renders *Update* before loading the room into its fields, and `PUT /api/room/{id}` sends every field. Editing the price while the form is still empty sends `roomName` and `type` as `null`, and the backend returns 400 (`Room name must be set`, `Type must be set`). The UI shows "Failed to update room", but its displayed values do not change, making a rejection easy to mistake for an action that did nothing. The suite waits for the populated form and verifies the PUT's 202 rather than inferring success from a displayed value.
 
-**Esperado:** `PUT /api/room/{id}` responde 202; el listado y el detalle reflejan los
-nuevos valores; el tipo y la accesibilidad, que nadie tocó, siguen igual (se leen antes
-de editar y se comparan después); y el precio nuevo se usa en el cálculo del
-*Price Summary* del sitio público.
+### TC25: Delete a room 🔧
 
-**Observación (D13):** el formulario de edición renderiza el botón *Update* **antes** de
-cargar la habitación en sus campos, y `PUT /api/room/{id}` envía todos los campos. Si se
-edita el precio sobre un formulario todavía vacío, la petición viaja con `roomName` y
-`type` en `null` y el backend responde 400 (`Room name must be set`, `Type must be set`).
-La UI muestra "Failed to update room", pero los datos en pantalla no cambian, así que es
-fácil leerlo como "no pasó nada" en vez de "falló". La suite espera a que el formulario
-esté poblado antes de tocarlo, y verifica el 202 del `PUT` en vez de deducir el resultado
-del valor mostrado.
+1. Delete a room created by the test.
 
-### TC25 — Eliminar una habitación 🔧
+Expected: it disappears from the admin list and `GET /api/room`, is no longer retrievable by `roomid`, and `/reservation/{roomid}` no longer renders *Book This Room*.
 
-1. Eliminar una habitación creada por el test.
+Adjustment (D9): a deleted room's `GET /api/room/{id}` returns 500, not 404. `/reservation/{id}` renders the Next.js error boundary ("This page couldn't load") rather than a 404 page. The case asserts that the room cannot be retrieved (`>= 400`) instead of a specific code, documenting the behavior without treating 500 as correct.
 
-**Esperado:** desaparece del listado de admin, desaparece de `GET /api/room`, deja de
-ser recuperable por su `roomid`, y `/reservation/{roomid}` ya no renderiza el panel
-*Book This Room*.
+### TC26: Validation when creating an incomplete room 🔧
 
-**Ajuste (D9):** "ya no es alcanzable" resultó ser más feo de lo esperado.
-`GET /api/room/{id}` de una habitación borrada devuelve **500**, no 404, y
-`/reservation/{id}` no muestra un 404 sino el error boundary de Next.js
-("This page couldn't load"). El caso asierta "no recuperable" (`>= 400`) en vez de un
-código concreto, para documentar el comportamiento sin bendecir el 500.
+1. Try to create a room without a number and/or price.
 
-### TC26 — Validación al crear una habitación incompleta 🔧
+Expected: `POST /api/room` returns 400, an appropriate message appears, and no room with that number remains.
 
-1. Intentar crear una habitación sin número y/o sin precio.
+Adjustment (D10): there are no per-field validation errors. A single message varies according to the missing input:
 
-**Esperado:** `POST /api/room` responde 400, se muestra el mensaje correspondiente y
-no queda ninguna habitación con ese número.
+| Input | Displayed message |
+| --- | --- |
+| No number and no price | `Failed to create room` |
+| Number provided, no price | `Failed to create room` |
+| No number, price provided | `Room name must be set` |
+| Negative price | `must be greater than or equal to 1` |
 
-**Ajuste (D10):** no hay errores de validación por campo. Hay un único mensaje, y es
-inconsistente según qué falte:
+Omitting the name gives a useful message; omitting the price gives an opaque one that does not identify the missing field.
 
-| Entrada                 | Mensaje mostrado                     |
-| ----------------------- | ------------------------------------ |
-| Sin número y sin precio | `Failed to create room`              |
-| Con número, sin precio  | `Failed to create room`              |
-| Sin número, con precio  | `Room name must be set`              |
-| Precio negativo         | `must be greater than or equal to 1` |
+Adjustment: an unchanged list size cannot be asserted while the suite runs in parallel, since another worker can legitimately create or delete a room at that moment. Verify that no room exists with the attempted draft's number, scoping the check to the test's own data.
 
-Es decir: omitir el **nombre** da un mensaje útil, pero omitir el **precio** da uno
-opaco que no dice qué falta.
+## F. Admin panel: bookings and messages
 
-**Ajuste:** "el listado no cambia de tamaño" tampoco se puede afirmar con la suite en
-paralelo (otro worker legítimamente crea o borra una habitación en ese instante). Se
-verifica que no exista ninguna habitación con el número del intento fallido, que es la
-misma afirmación acotada a los datos del propio test.
+### TC27: A UI booking appears in the admin panel 🔍
 
----
+1. Create a booking through the public site (TC09) with traceable data.
+2. Open that room's bookings section in the admin panel.
 
-## F. Panel de administración — reservas y mensajes
+Expected: the booking lists the guest's first name, last name and exact dates.
 
-### TC27 — Una reserva hecha por UI aparece en el panel de admin 🔍
+### TC28: A contact message appears in the inbox and is marked as read 🔧
 
-1. Crear una reserva por el sitio público (TC09) con datos trazables.
-2. Entrar al panel de admin, sección de reservas de esa habitación.
+1. Send a contact message with a unique subject (TC15).
+2. Open the admin messages section.
+3. Open the message.
 
-**Esperado:** la reserva figura con el nombre del huésped y las fechas exactas.
+Expected: the list shows the message's subject and sender with `read-false` state. Opening it shows the full name, email, phone, subject and body. After closing it, the row changes to `read-true`, and `GET /api/message` reports it as read.
 
-### TC28 — Un mensaje de contacto aparece en la bandeja de admin y se marca como leído 🔧
+Adjustment: the unread count cannot be expected to decrease by exactly one. In a run with 4 workers, it decreased by two because another worker's teardown deleted a booking notification (D12) at the same time. The badge assertion now checks UI/API consistency: its number matches the unread message count returned by `GET /api/message`, checked before and after opening the message.
 
-1. Enviar un mensaje de contacto con asunto único (TC15).
-2. Entrar al panel de admin, sección de mensajes.
-3. Abrir el mensaje.
+Note: inbox rows use indexed `data-testid` values (`message0`, `message1`, …) that shift when someone else uses the shared inbox. The suite locates its row by the unique subject, never by index.
 
-**Esperado:** el mensaje aparece en la lista con su asunto y remitente y con estado
-`read-false`; al abrirlo se ven nombre, email, teléfono, asunto y cuerpo completos; al
-cerrarlo la fila pasa a `read-true` y `GET /api/message` lo reporta como leído.
+## Coverage deliberately out of scope
 
-**Ajuste:** "el contador de mensajes sin leer decrementa **en 1**" no se sostiene. Se
-midió: bajó **2** en una corrida a 4 workers, porque el teardown de otro worker borró
-una notificación de reserva (D12) en el mismo instante. La aserción sobre el badge pasó
-a ser de **consistencia UI ↔ API**: el número del badge coincide con la cantidad de
-mensajes no leídos que devuelve `GET /api/message`, verificado antes y después de abrir
-el mensaje.
+These are explicit scope decisions, not omissions. `STRATEGY.md` describes the details and proposed order of work.
 
-**Nota:** las filas del inbox llevan `data-testid` indexados (`message0`, `message1`,
-…) que se corren en cuanto alguien más usa la bandeja compartida. La suite localiza su
-fila por el asunto único, nunca por índice.
-
----
-
-## Cobertura deliberadamente fuera de alcance
-
-Anotado acá para que quede explícito que es una decisión y no un olvido; el detalle
-y el orden en que se atacaría están en `STRATEGY.md`.
-
-- **Seguridad:** fuerza bruta del login, expiración/manipulación del token, IDOR sobre
-  `roomid`/`bookingid`, XSS almacenado vía formulario de contacto.
-- **Reglas de negocio de disponibilidad:** doble reserva del mismo rango, solapamientos
-  parciales, check-out anterior al check-in, rangos en el pasado.
-- **Accesibilidad:** navegación por teclado, labels de formularios, contraste.
-- **Cross-browser y responsive:** la suite corre en Chromium; el sitio tiene layout
-  móvil con `navbar-toggler` sin cubrir.
-- **Branding/configuración de admin:** edición de logo, descripción y datos de contacto.
+- Security: login brute force, token expiry or tampering, IDOR on `roomid`/`bookingid`, and stored XSS through the contact form.
+- Availability business rules: duplicate bookings, partial overlaps, check-out before check-in and stays in the past.
+- Accessibility: keyboard navigation, form labels and contrast.
+- Cross-browser and responsive behavior: the suite runs in Chromium; the mobile `navbar-toggler` layout is not covered.
+- Admin branding and configuration: editing the logo, description and contact details.
