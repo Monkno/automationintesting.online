@@ -1,144 +1,170 @@
-# automationintesting.online — E2E suite (Playwright + TypeScript)
+# automationintesting.online
 
-End-to-end suite for **Restful Booker Platform v2.2** at
-<https://automationintesting.online> — a Bed & Breakfast demo with a public booking
-site, an admin panel and its own REST API.
+Un proyecto colaborativo para practicar QA con AI, Playwright y TypeScript sobre [automationintesting.online](https://automationintesting.online), la demo de Bed & Breakfast de Restful Booker Platform.
 
-28 test cases (`TEST_CASES.md`), 37 executable tests, one Chromium project.
-Last full run: **37 passed in 34s** with 4 workers and retries disabled.
+Si sos QA manual y querés empezar a automatizar, estás aprendiendo TypeScript o ya tenés experiencia y querés compartirla, este repo tiene lugar para tu aporte. Podés empezar mejorando una instrucción, proponiendo un caso o revisando una aserción. La idea es aprender con cambios pequeños que otras personas puedan entender, ejecutar y discutir.
 
-- `TEST_CASES.md` — the cases, with the eleven that were rewritten because the
-  application disagreed with them.
-- `STRATEGY.md` — architecture, isolation on a shared site, redundancy, coverage
-  gaps, trade-offs, and the sixteen defects and oddities found.
+AI puede ayudar a explorar riesgos, explicar el código y proponer pruebas. Cada contribución necesita criterio QA y evidencia: qué comportamiento verifica, por qué importa y qué pasó al ejecutarla. Podés usar el asistente que prefieras; también podés contribuir sin AI.
 
----
+## Tu primera contribución
 
-## Install and run
+1. Seguí la instalación y ejecutá los tests unitarios de abajo.
+2. Elegí un caso de [TEST_CASES.md](TEST_CASES.md) y buscá su implementación en `tests/`.
+3. Leé [CONTRIBUTING.md](CONTRIBUTING.md) para preparar tu cambio y abrir un pull request.
+4. Si querés practicar con un asistente, usá los ejemplos de [AI_WORKFLOW.md](docs/AI_WORKFLOW.md).
 
-Requires Node 18 or newer.
+Las preguntas también ayudan: si un paso no se entiende, [abrí un issue](https://github.com/Monkno/automationintesting.online/issues/new/choose) y contá dónde te trabaste. Aceptamos issues y pull requests en español o inglés.
+
+### Agents de QA Automation recomendados
+
+También podés practicar con los agents de QA Automation de [Monkno](https://github.com/Monkno). Si querés utilizarlos, [consultá cómo acceder y configurarlos](https://github.com/Monkno/automationintesting.online/issues/new/choose). Compartí con el agent el caso que estás trabajando y las instrucciones de este repo, y verificá personalmente su propuesta. Su uso es opcional; podés colaborar con otro asistente o sin AI.
+
+## Instalar y ejecutar
+
+Necesitás Git, Node.js y npm. El `package-lock.json` actual exige como mínimo Node.js 20 y npm 9. Para una instalación nueva, usá una versión de Node compatible con los [requisitos vigentes de Playwright](https://playwright.dev/docs/intro#system-requirements).
+
+### Bash (Linux, macOS o Git Bash)
 
 ```bash
-npm ci                     # or: npm install
+git clone https://github.com/Monkno/automationintesting.online.git
+cd automationintesting.online
+npm ci
 npx playwright install --with-deps chromium
-cp .env.example .env       # Windows PowerShell: Copy-Item .env.example .env
+cp .env.example .env
+npm run typecheck
+npx playwright test --grep @unit
+```
+
+### Windows PowerShell
+
+```powershell
+git clone https://github.com/Monkno/automationintesting.online.git
+Set-Location automationintesting.online
+npm ci
+npx playwright install chromium
+Copy-Item .env.example .env
+npm run typecheck
+npx playwright test --grep '@unit'
+```
+
+Si vas a colaborar, hacé primero un fork y reemplazá la URL del clon por la de tu fork. Los tests `@unit` verifican los parsers de precios sin abrir un navegador ni acceder al sitio; son una primera comprobación local. Instalar Chromium deja preparado el entorno para los E2E.
+
+Para una primera ejecución E2E acotada:
+
+```bash
+npx playwright test tests/public/catalog.spec.ts --workers=1 --retries=0
+```
+
+Para ejecutar toda la suite:
+
+```bash
 npm test
 ```
 
-`.env` is required. Without `ADMIN_USER` and `ADMIN_PASS` every test that needs an
-admin session fails immediately with
-`ADMIN_USER and ADMIN_PASS must be set — copy .env.example to .env`, rather than
-silently falling back to a hard-coded credential. `.env.example` already holds the
-public demo credentials of the restful-booker-platform project, so copying it is
-enough.
+La suite completa crea reservas, mensajes y habitaciones en una demo compartida. Leé las reglas de aislamiento de abajo antes de ejecutarla o ampliar la cobertura.
 
-### Other commands
+### Configuración
 
-```bash
-npm test                       # everything
-npm run test:public            # tests/public   — catalogue and navigation
-npm run test:booking           # tests/booking  — availability, pricing, reservations
-npm run test:contact           # tests/contact  — contact form
-npm run test:admin             # tests/admin    — admin panel
-npx playwright test --grep @unit    # the money parsers, no browser needed
-npm run test:headed            # watch it run
-npm run report                 # open the HTML report of the last run
-npm run typecheck              # tsc --noEmit
-```
+Copiar `.env.example` alcanza para usar las credenciales públicas de la demo. Las fixtures que necesitan una sesión de admin fallan si faltan `ADMIN_USER` o `ADMIN_PASS`. `.env` está ignorado por Git.
 
-### Configuration
-
-| Variable | Default | What it does |
+| Variable | Valor por defecto | Uso |
 | --- | --- | --- |
-| `BASE_URL` | `https://automationintesting.online` | System under test |
-| `ADMIN_USER` | *(required)* | Admin panel username |
-| `ADMIN_PASS` | *(required)* | Admin panel password |
-| `WORKERS` | `4` | Parallel workers. See STRATEGY.md for the measurement behind 4. |
+| `BASE_URL` | `https://automationintesting.online` | Sitio bajo prueba |
+| `ADMIN_USER` | Requerida para fixtures de admin | Usuario del panel |
+| `ADMIN_PASS` | Requerida para fixtures de admin | Contraseña del panel |
+| `WORKERS` | `4` | Paralelismo de la suite |
+
+En Bash:
 
 ```bash
-WORKERS=1 npx playwright test          # serial, for debugging
+WORKERS=1 npx playwright test --retries=0
 BASE_URL=http://localhost:8080 npm test
 ```
 
----
+En PowerShell:
 
-## Layout
+```powershell
+$env:WORKERS = '1'
+npx playwright test --retries=0
+Remove-Item Env:WORKERS
 
+$env:BASE_URL = 'http://localhost:8080'
+npm test
+Remove-Item Env:BASE_URL
 ```
+
+`BASE_URL` permite apuntar a un despliegue propio que ya esté funcionando; este repo contiene la suite, no levanta la aplicación. Las variables exportadas prevalecen sobre `.env`.
+
+### Comandos útiles
+
+| Comando | Qué ejecuta |
+| --- | --- |
+| `npm test` | Toda la suite |
+| `npm run test:public` | Catálogo y navegación pública |
+| `npm run test:booking` | Disponibilidad, precios y reservas |
+| `npm run test:contact` | Formulario de contacto |
+| `npm run test:admin` | Panel de administración |
+| `npx playwright test --grep @unit` | Parsers de precios, sin navegador |
+| `npx playwright test --list` | Lista de tests, sin ejecutarlos |
+| `npm run test:headed` | Ejecución con navegador visible |
+| `npx playwright test --ui` | Modo interactivo de Playwright |
+| `npm run report` | Reporte HTML de la última ejecución |
+| `npm run typecheck` | Validación de tipos con `tsc --noEmit` |
+
+La configuración actual usa Chromium, 4 workers y 1 retry local (2 cuando `CI` está definido). Para investigar una falla, ejecutá el archivo afectado con `--workers=1 --retries=0 --trace=on`. Una ejecución verde con retries puede incluir un test flaky: revisá el reporte.
+
+## Cómo está organizado
+
+```text
 src/
-  core/         BasePage, BaseComponent
-  components/   SiteNav, RoomCard, PriceSummary, AdminNav
-  pages/        HomePage, ReservationPage, AdminLoginPage,
-                AdminRoomsPage, AdminRoomDetailPage, AdminMessagesPage
-  flows/        BookingFlow, ContactFlow, AdminSessionFlow
-  fixtures/     test.ts — dependency injection and the teardown janitor
-  data/         types.ts, factories.ts (@faker-js/faker)
-  support/      api.ts (REST client + stay allocator), money.ts, dates.ts,
-                catalogue.ts
+  core/         BasePage y BaseComponent
+  components/   Navegación, tarjetas y resumen de precios reutilizables
+  pages/        Controles y verificaciones de cada página
+  flows/        Secuencias de reserva, contacto y sesión de admin
+  fixtures/     Fixtures de test, sesiones y limpieza con janitor
+  data/         Tipos y factories de datos con Faker
+  support/      Cliente API, fechas, catálogo y parsers de precios
 tests/
-  public/  booking/  contact/  admin/  unit/
+  public/       Catálogo y navegación
+  booking/      Precios y reservas
+  contact/      Mensajes desde el sitio público
+  admin/        Autenticación, habitaciones y bandeja de mensajes
+  unit/         Parsers de precios
 ```
 
----
+La base documenta 28 casos y contiene 37 tests ejecutables. La correspondencia detallada está en [TEST_CASES.md](TEST_CASES.md); `npx playwright test --list` muestra el inventario ejecutable actual.
 
-## Case coverage
+| Casos | Implementación |
+| --- | --- |
+| TC01 a TC05 | `tests/public/catalog.spec.ts` |
+| TC06 a TC08 | `tests/booking/pricing.spec.ts` |
+| TC09 a TC14 | `tests/booking/reserve.spec.ts` |
+| TC15 a TC18 | `tests/contact/contact.spec.ts` |
+| TC19 a TC22 | `tests/admin/auth.spec.ts` |
+| TC23 a TC26 | `tests/admin/rooms.spec.ts` |
+| TC27 y TC28 | `tests/admin/inbox.spec.ts` |
+| Parsers de precios | `tests/unit/money.spec.ts` |
 
-| Case | File | Test title |
-| --- | --- | --- |
-| TC01 | `tests/public/catalog.spec.ts` | TC01 — the home page lists every published room with the type and price the API reports |
-| TC02 | `tests/public/catalog.spec.ts` | TC02 — every header link scrolls its section into view |
-| TC03 | `tests/public/catalog.spec.ts` | TC03 — the room detail shows the description, features and policies of that room |
-| TC04 | `tests/public/catalog.spec.ts` | TC04 — "Similar Rooms" offers the rest of the catalogue and never the current room |
-| TC05 | `tests/public/catalog.spec.ts` | TC05 — the location panel and the footer show the branding contact details |
-| TC06 | `tests/booking/pricing.spec.ts` | TC06 — Check Availability carries the chosen dates through to the reservation |
-| TC07 | `tests/booking/pricing.spec.ts` | TC07 — the price summary computes nights, fees and total |
-| TC08 | `tests/booking/pricing.spec.ts` | TC08 — changing the number of nights rescales the subtotal but not the fixed fees |
-| TC09 | `tests/booking/reserve.spec.ts` | TC09 + TC14 — a valid reservation is confirmed on screen and stored in the backend |
-| TC10 | `tests/booking/reserve.spec.ts` | TC10 — submitting an empty reservation form reports every field and creates nothing |
-| TC11 | `tests/booking/reserve.spec.ts` | TC11 — a phone of 10 characters (one under the minimum) is rejected |
-| TC11 | `tests/booking/reserve.spec.ts` | TC11 — a phone of 22 characters (one over the maximum) is rejected |
-| TC11 | `tests/booking/reserve.spec.ts` | TC11 — a phone of 11 characters (the minimum) is accepted |
-| TC11 | `tests/booking/reserve.spec.ts` | TC11 — a phone of 21 characters (the maximum) is accepted |
-| TC12 | `tests/booking/reserve.spec.ts` | TC12 — a malformed email is rejected and no booking is created |
-| TC13 | `tests/booking/reserve.spec.ts` | TC13 — Cancel discards the reservation form and creates nothing |
-| TC14 | `tests/booking/reserve.spec.ts` | TC09 + TC14 — a valid reservation is confirmed on screen and stored in the backend |
-| TC15 | `tests/contact/contact.spec.ts` | TC15 + TC18 — a valid message is acknowledged, counted and stored verbatim |
-| TC16 | `tests/contact/contact.spec.ts` | TC16 — an empty contact form reports every required field and sends nothing |
-| TC17 | `tests/contact/contact.spec.ts` | TC17 — a subject below its minimum length is rejected |
-| TC17 | `tests/contact/contact.spec.ts` | TC17 — a message below its minimum length is rejected |
-| TC18 | `tests/contact/contact.spec.ts` | TC15 + TC18 — a valid message is acknowledged, counted and stored verbatim |
-| TC19 | `tests/admin/auth.spec.ts` | TC19 — valid credentials open the admin panel |
-| TC20 | `tests/admin/auth.spec.ts` | TC20 — invalid credentials are refused and leave the user on the login form |
-| TC21 | `tests/admin/auth.spec.ts` | TC21 — logging out ends the session, and the panel asks for credentials again |
-| TC22 | `tests/admin/auth.spec.ts` | TC22 — every admin route redirects to the login form without a session |
-| TC23 | `tests/admin/rooms.spec.ts` | TC23 — a created room appears in the admin listing, the API and its public page |
-| TC24 | `tests/admin/rooms.spec.ts` | TC24 — editing a room updates the listing, the detail and the public price summary |
-| TC25 | `tests/admin/rooms.spec.ts` | TC25 — a deleted room disappears from the listing, the catalogue and its own URL |
-| TC26 | `tests/admin/rooms.spec.ts` | TC26 — creating a room with no number and no price is rejected |
-| TC26 | `tests/admin/rooms.spec.ts` | TC26 — creating a room with no price is rejected |
-| TC26 | `tests/admin/rooms.spec.ts` | TC26 — creating a room with no number is rejected |
-| TC26 | `tests/admin/rooms.spec.ts` | TC26 — creating a room with a price below the minimum is rejected |
-| TC27 | `tests/admin/inbox.spec.ts` | TC27 — a booking made on the public site is listed against its room in the panel |
-| TC28 | `tests/admin/inbox.spec.ts` | TC28 — a contact message reaches the inbox, opens in full and is then marked read |
-| —    | `tests/unit/money.spec.ts` | Money parsing @unit — four cases guarding the price parsers |
+TC09/TC14 y TC15/TC18 comparten un test por pareja para verificar UI y API sobre los mismos datos. [STRATEGY.md](STRATEGY.md) explica esa decisión, las capas, la concurrencia y los defectos observados. Sus mediciones corresponden al 3 de septiembre de 2026; sirven como referencia histórica, no como garantía de una ejecución actual.
 
-TC09/TC14 and TC15/TC18 are each one test: the second case of each pair is the
-first plus a backend read, and running the expensive half twice on a shared site
-would write double the data to prove nothing extra. See `STRATEGY.md`.
+## Cuidar la demo compartida
 
----
+- Modificá o eliminá únicamente datos creados por tu test. Conservá las habitaciones semilla 101, 102 y 103 y los datos de otras personas.
+- Reutilizá las factories y los identificadores propios de la suite. Registrá cada entidad creada en `janitor`; una reserva también puede generar una notificación en la bandeja de admin.
+- Para reservar, usá `workerRoom` y `bookableStay` en lugar de fechas fijas que podrían estar ocupadas.
+- Verificá resultados sobre tus propios datos. Los contadores globales pueden cambiar mientras otra persona usa el sitio.
 
-## What the suite writes to the shared site
+La limpieza es best-effort y la demo puede reiniciarse durante una ejecución. Un timeout o un 409 necesita investigación antes de atribuirlo a un defecto del test. Para explorar concurrencia, seguridad o cambios de branding global, proponé primero el alcance en un issue y usá un despliegue propio.
 
-This is a public demo that anyone can use, so the suite is careful about it:
+## Por dónde puede crecer
 
-- the three seed rooms (101, 102, 103) and other people's messages and bookings
-  are **never** modified or deleted;
-- every room, booking and message it creates carries a `Qa`/`9…` prefix and a tag
-  unique per worker and per millisecond;
-- everything is removed at teardown through the API — including the inbox message
-  the backend silently writes for each booking (defect D12);
-- booking dates are searched for, not computed, so two runs never collide.
+Estas son propuestas para discutir, basadas en las brechas de [STRATEGY.md](STRATEGY.md), no funcionalidades ya implementadas:
 
-After four consecutive full runs the site held exactly its seed data plus what
-other users had left.
+- Documentar una experiencia de instalación o aclarar un caso existente.
+- Proponer casos de borde para nombres, teléfonos, mensajes y rangos de fechas.
+- Explorar teclado, labels y navegación móvil con pasos reproducibles.
+- Analizar una falla intermitente con trazas y evidencia de aislamiento.
+- Proponer cobertura en Firefox y WebKit, o una ejecución en CI, explicando su costo sobre la demo.
+- Compartir un ejemplo de uso de AI: el contexto que le diste, qué sugirió y qué corregiste al verificarlo.
+
+Elegí una mejora en [CONTRIBUTING.md](CONTRIBUTING.md) o [proponé la tuya](https://github.com/Monkno/automationintesting.online/issues/new/choose). Un pull request pequeño con una explicación clara es una buena forma de empezar.
